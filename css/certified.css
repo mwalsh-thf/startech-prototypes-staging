@@ -1,0 +1,346 @@
+/* =========================================================
+   Yellow-dot Certified (Figma 700:374)
+   Pinned stage, same idea as the intro: the section owns a scroll
+   runway and everything happens inside the viewport.
+     Act 1  heading and media fade + sharpen in from the bottom of the page
+            as the section enters, rising a little as they land.
+     Act 2  accordion fades up beneath the media.
+     Act 3  the accordion drawers open one after another on scroll.
+   Page colour: once the section reaches the middle of the viewport the page
+   (this stage and the Why section above it) fades from aluminium to yellow
+   on a short timed transition, and back again on the way out. js/certified.js
+   toggles html.is-yellow-page; the fade itself is a CSS transition, not
+   scroll-scrubbed.
+   All motion is driven by custom props / classes set in js/certified.js.
+   ========================================================= */
+
+.certified {
+  /* Runway: js/certified.js sets the height (viewport heights of scroll plus
+     the stage's own height, which is taller than a short viewport). */
+  position: relative;
+  padding: 0;                          /* override the generic section padding-block */
+  z-index: 2;                          /* rides over the intro's tail */
+  margin-top: 0;
+  height: calc(3.8 * 100svh + 100svh);
+  background: transparent;             /* the stage paints the aluminium once it's in */
+  color: var(--st-silicon);
+}
+
+.certified-stage {
+  position: sticky;
+  /* 0 when the stage fits the viewport; negative when it doesn't, so the
+     pinned view is anchored to the bottom and the accordion stays in view. */
+  top: var(--cert-pin-top, 0px);
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  --cert-gap: clamp(28px, 4.5svh, 60px);
+  --cert-row-gap: 100px;               /* media → accordion */
+  gap: var(--cert-gap);
+  /* Top clears the fixed header now the heading leads (Figma: 80px). */
+  padding: clamp(72px, 9svh, 96px) 40px clamp(24px, 4svh, 60px);
+  box-sizing: border-box;
+  overflow: hidden;
+  background-color: var(--st-aluminium);
+  transition: background-color var(--page-fade-dur) var(--page-fade-ease);
+}
+.certified-stage > * { position: relative; }
+
+/* Fade to yellow (see header note). Shared by the Why and Connect sections. */
+:root { --page-fade-dur: .3s; --page-fade-ease: cubic-bezier(.45, 0, .2, 1); }
+html.is-yellow-page .certified-stage,
+html.is-yellow-page .why,
+html.is-yellow-page .connect { background-color: var(--st-yellow); }
+/* The page canvas follows too, so any strip the stage doesn't cover (Safari
+   collapsing its toolbar mid-scroll) shows yellow, not the aluminium canvas. */
+body { transition: background-color var(--page-fade-dur) var(--page-fade-ease); }
+html.is-yellow-page body { background-color: var(--st-yellow); }
+/* Past the section (scrolling down) the stage settles on white to meet the
+   white Connect section, so no aluminium band shows between them. */
+html.is-white-page .certified-stage,
+html.is-white-page body { background-color: var(--st-white); }
+
+/* ---- Media: 2.40:1, pill corners, curtain reveal ---------------------- */
+.certified-media {
+  position: relative;
+  /* Always 2.4:1. Width is whatever lets it fit the stage: full width on
+     wide-and-tall screens, otherwise capped so copy still fits beneath. */
+  flex: none;                          /* never let the flex column squash the ratio */
+  width: 100%;
+  aspect-ratio: 240 / 100;
+  margin-inline: auto;
+  /* Entry: fades in while rising from the bottom of the page. The frame itself
+     stays sharp; only the picture inside (.certified-zoom) is blurred. */
+  opacity: var(--cert-media-o, 0);
+  transform: translate3d(0, var(--cert-media-y, 0px), 0);
+  cursor: pointer;
+  will-change: opacity, transform;
+}
+/* Same grow-on-hover as the intro frame; armed once fully revealed. */
+.certified-zoom {
+  position: absolute;
+  inset: 0;
+  transform-origin: 50% 50%;
+  /* Blur lives here so the rounded frame edge (overflow: hidden above) stays
+     crisp. Slight over-scale hides the soft edge the blur would otherwise leave. */
+  filter: blur(var(--cert-media-blur, 0px));
+  transform: scale(var(--cert-media-scale, 1));
+  will-change: filter, transform;      /* no transition while scroll drives the scale */
+}
+.certified.is-revealed .certified-media:hover .certified-zoom { transform: scale(1.045); }
+
+/* The clipping frame. On hover it draws in by 15px on every side (corner radius
+   drops by the same amount) while .certified-zoom offsets the other way so the
+   picture stays put and only grows. A real border-radius box (not clip-path) so
+   the global corner-shape smoothing applies. */
+.certified-clip {
+  --cert-inset: 0px;
+  position: absolute;
+  inset: var(--cert-inset);
+  border-radius: max(0px, calc(min(80px, 5.8vw) * var(--corner-k, 1) - var(--cert-inset)));
+  overflow: hidden;
+  background: var(--st-titanium);
+}
+.certified-zoom { inset: calc(-1 * var(--cert-inset)); }
+.certified.is-revealed .certified-clip { transition: inset var(--hover-dur) var(--hover-ease), border-radius var(--hover-dur) var(--hover-ease); }
+.certified.is-revealed .certified-zoom { transition: transform var(--hover-dur) var(--hover-ease), inset var(--hover-dur) var(--hover-ease); }
+.certified.is-revealed .certified-media:hover .certified-clip { --cert-inset: 15px; }
+.certified.is-revealed .certified-cta { transition: background-color 0.25s ease, color 0.25s ease, bottom var(--hover-dur) var(--hover-ease); }
+.certified.is-revealed .certified-media:hover .certified-cta { bottom: calc(clamp(18px, 2.4vw, 34px) + 15px); }
+
+.certified-frame {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;                          /* hard cuts, no cross-fade: a spritz */
+}
+.certified-frame.is-active { opacity: 1; }
+
+/* 10% black over the still so the CTA reads (Figma 700:399). */
+.certified-clip::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgb(0 0 0 / 0.1);
+  pointer-events: none;
+}
+/* CTA pill, bottom-centre (Figma 705:601). */
+.certified-cta {
+  position: absolute;
+  z-index: 1;
+  left: 50%;
+  bottom: clamp(18px, 2.4vw, 34px);
+  transform: translateX(-50%);
+  padding: 10px 20px;
+  border-radius: 48px;
+  background: var(--st-yellow);
+  color: var(--st-silicon);
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 1.3;
+  white-space: nowrap;
+  text-decoration: none;
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+/* Hovering anywhere on the film puts the button in its hover state. */
+.certified-cta:hover, .certified-cta:focus-visible,
+.certified.is-revealed .certified-media:hover .certified-cta { background: var(--st-white); color: var(--st-silicon); }
+
+/* ---- Copy row ---------------------------------------------------------- */
+.certified-row {
+  margin-top: calc(var(--cert-row-gap) - var(--cert-gap));
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: 20px;
+  align-items: start;
+  opacity: var(--cert-copy-opacity, 0);
+  transform: translate3d(0, var(--cert-copy-y, 40px), 0);
+  will-change: opacity, transform;
+}
+
+.certified-heading {
+  margin: 0;
+  padding: 10px;
+  max-width: 717px;
+  font-weight: 300;
+  font-size: clamp(28px, 3.6vw, 51.88px);
+  line-height: 1.1;
+  color: var(--st-silicon);
+  /* Lands with the media */
+  opacity: var(--cert-media-o, 0);
+  transform: translate3d(0, var(--cert-media-y, 0px), 0);
+  will-change: opacity, transform;
+}
+.certified-heading-sub { color: rgb(50 56 60 / 0.5); }   /* #32383C at 50% */
+.certified-tm {
+  font-size: 0.42em;
+  font-weight: 300;
+  line-height: 1;
+  vertical-align: top;
+  position: relative;
+  top: 0.08em;
+  margin-left: 0.08em;
+}
+
+/* ---- Accordion --------------------------------------------------------- */
+.certified-acc {
+  grid-column: 5 / span 8;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  /* Lets the drawer copy size from the accordion's width (cqi) rather than
+     the text column, which narrows while the image grows in. */
+  container-type: inline-size;
+}
+.certified-item {
+  border-top: 1px solid var(--st-silicon);
+  /* Figma 700:425: closed rows are ~93px tall (41px type + 26px either side) */
+  padding: 26px 0;
+  /* Open items gain a 3:2 image on the left (Figma: 4 of the 8 accordion
+     columns); the head and body sit in the remaining columns. The image column
+     grows from 0 so the whole row opens with the drawer. */
+  --acc-img: 0px;
+  --acc-img-gap: 0px;
+  --acc-col: calc((100% - 7 * 20px) / 8);
+  /* The open text column's 3 of 4 columns, fixed so copy never reflows. */
+  --acc-copy-w: calc((100cqi - 7 * 20px) / 8 * 3 + 2 * 20px);
+  display: grid;
+  grid-template-columns: var(--acc-img) minmax(0, 1fr);
+  /* auto 1fr, not auto auto: the image spans both rows, and two auto rows
+     would share its height and push the body copy away from the heading. */
+  grid-template-rows: auto 1fr;
+  align-items: start;
+  column-gap: var(--acc-img-gap);
+  transition: grid-template-columns 0.7s cubic-bezier(0.16, 1, 0.3, 1), column-gap 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.certified-item.is-open {
+  --acc-img: calc(var(--acc-col) * 4 + 3 * 20px);
+  --acc-img-gap: 20px;
+}
+.certified-item-media {
+  grid-column: 1;
+  grid-row: 1 / span 2;
+  align-self: start;
+  width: 100%;
+  aspect-ratio: 3 / 2;
+  min-width: 0;
+  border-radius: calc(40px * var(--corner-k, 1));
+  overflow: hidden;
+  /* Empty placeholder frame until the photos arrive; an <img> inside covers it. */
+  background: color-mix(in srgb, var(--st-silicon) 10%, transparent);
+}
+.certified-item-media img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.certified-item-head, .certified-item-body { grid-column: 2; min-width: 0; }
+.certified-item.is-open .certified-item-head { white-space: normal; }
+/* Heading wraps inside the same 3 columns as the body copy ("The fix you can / find") */
+.certified-item.is-open .certified-item-head p:first-child { max-width: var(--acc-copy-w); }
+.certified-item-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  font-weight: 300;
+  font-size: clamp(22px, 2.9vw, 41.5px);
+  line-height: 1;
+  white-space: nowrap;
+  color: var(--st-silicon);
+}
+.certified-item-head p { margin: 0; }
+.certified-item-num {
+  font-family: var(--font-fono);
+  font-weight: 300;
+  color: var(--st-silicon);
+  transition: color 0.5s ease;
+}
+
+/* The drawer: grid rows 0fr -> 1fr animates height without measuring. */
+.certified-item-body {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.certified-item-body > div {
+  overflow: hidden;
+  /* 3 of the 4 columns beside the open image, like the Figma body copy.
+     A fixed width, so the paragraph doesn't rewrap as the image grows. */
+  width: var(--acc-copy-w);
+}
+.certified-item-body p {
+  margin: 20px 0 0;
+  font-weight: 400;
+  font-size: 17px;
+  line-height: 1.3;
+  color: var(--st-silicon);
+  opacity: 0;
+  transform: translate3d(0, 10px, 0);
+  transition: opacity 0.45s ease 0.05s, transform 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.05s;
+}
+.certified-item.is-open .certified-item-body { grid-template-rows: 1fr; }
+.certified-item.is-open .certified-item-body p {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+  transition-delay: 0.15s;
+}
+
+/* js/certified.js measures the stage with drawer 01 open; no transitions then. */
+.certified.is-measuring .certified-item,
+.certified.is-measuring .certified-item-body,
+.certified.is-measuring .certified-item-media { transition: none; }
+
+/* ---- Mobile ------------------------------------------------------------ */
+@media (max-width: 760px) {
+  .certified-stage {
+    padding-inline: var(--page-gutter, 16px);
+    --cert-gap: 28px;
+    --cert-row-gap: 56px;
+    gap: var(--cert-gap);
+    justify-content: flex-start;
+    padding-top: 88px;
+  }
+  .certified-media { aspect-ratio: 3 / 2; }
+  .certified-row {
+    grid-template-columns: 1fr;
+    row-gap: 24px;
+  }
+  .certified-acc { grid-column: 1; }
+  .certified-heading { padding: 0; font-size: clamp(26px, 7.5vw, 32px); }
+  .certified-cta { font-size: 12px; padding: 8px 14px; bottom: 14px; }
+  .certified-item-head { font-size: clamp(22px, 6.2vw, 26px); white-space: normal; }
+  .certified-item-body > div { width: 100%; }
+  .certified-item-body p { font-size: 15px; }
+  .certified-item { grid-template-columns: 1fr; grid-template-rows: auto auto auto; column-gap: 0; transition: none; }
+  /* 3:2 at the full column width (viewport less the two gutters) */
+  .certified-item.is-open { --acc-img: calc((100vw - 2 * var(--page-gutter, 16px)) / 1.5); }
+  .certified-item-media {
+    grid-column: 1; grid-row: 3;
+    width: auto; height: var(--acc-img);
+    margin-top: calc(var(--acc-img) * 0.06);
+    transition: height 0.7s cubic-bezier(0.16, 1, 0.3, 1), margin-top 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .certified-item-head, .certified-item-body { grid-column: 1; }
+  .certified-item.is-open .certified-item-head p:first-child { max-width: none; }
+}
+
+/* ---- Reduced motion: everything static, first drawer open -------------- */
+@media (prefers-reduced-motion: reduce) {
+  .certified { height: auto; margin-top: 0 !important; }
+  .certified-stage { position: static; min-height: 0; padding-top: clamp(24px, 4svh, 60px); }
+  .certified-stage, .why { transition: none; }
+  .certified-media, .certified-heading { opacity: 1; transform: none; }
+  .certified-zoom { transition: none; filter: none; transform: none; }
+  .certified-clip, .certified-zoom, .certified-cta { transition: none; }
+  .certified-frame:first-child { opacity: 1; }
+  .certified-row { opacity: 1; transform: none; }
+  .certified-item-body, .certified-item-body p, .certified-item, .certified-item-media { transition: none; }
+}

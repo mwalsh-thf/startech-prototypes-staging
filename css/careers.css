@@ -1,0 +1,143 @@
+/* =========================================================
+   Culture / Careers (Figma 728:2005).
+   Two photo tiles side by side on white, 50/50 at rest (Frame 1). Hovering
+   (or focusing) one grows it horizontally while the other gives way, to
+   the 588 : 846 split of Frame 2. Each tile carries a white card (bottom
+   left / bottom right) with a titanium kicker, silicon line (21.25) and a
+   yellow button.
+   Imagery behaves like the Why tiles: zoom on hover, and a subtle scroll
+   parallax (js/careers.js sets --plx-y). Tiles rise in on scroll (.is-in).
+   ========================================================= */
+.cc {
+  --cc-ease: cubic-bezier(.22, 1, .36, 1);
+  position: relative;
+  z-index: 2;
+  padding: 40px;
+  /* Tuck 1px under Connect: the body is silicon by now (footer state), so a
+     sub-pixel seam would show as a dark line. */
+  margin-top: -1px;
+  background: var(--st-white);
+  color: var(--st-silicon);
+}
+
+.cc-duo {
+  display: flex;
+  gap: 20px;
+  /* 1454 × 686 in the design: both tiles share this height. */
+  aspect-ratio: 1454 / 686;
+  max-width: 1840px;
+  margin: 0 auto;
+}
+
+.cc-tile {
+  position: relative;
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  align-items: flex-end;
+  padding: 30px;
+  overflow: hidden;
+  isolation: isolate;
+  border-radius: calc(80px * var(--corner-k, 1));
+  corner-shape: var(--corner-shape);
+  background: var(--st-titanium);
+  color: var(--st-silicon);
+  text-decoration: none;
+  /* Entry: rises and fades, staggered by --i (set inline). */
+  opacity: 0;
+  transform: translate3d(0, 48px, 0);
+  transition: flex-grow .8s var(--cc-ease),
+              opacity .9s var(--cc-ease) calc(var(--i, 0) * .18s),
+              transform .9s var(--cc-ease) calc(var(--i, 0) * .18s);
+}
+.cc-tile.is-in { opacity: 1; transform: none; }
+.cc-tile-careers { justify-content: flex-end; }
+
+/* Frame 2: 846 / 717 and 588 / 717 of the resting width. */
+@media (hover: hover) {
+  .cc-duo:hover .cc-tile,
+  .cc-duo:has(.cc-tile:focus-visible) .cc-tile { flex-grow: .82; }
+  .cc-duo .cc-tile:hover,
+  .cc-duo .cc-tile:focus-visible { flex-grow: 1.18; }
+}
+
+.cc-img {
+  position: absolute; left: 0; z-index: 0;
+  /* Oversized by --plx-over so js/careers.js can slide it within the frame
+     (parallax via `translate`); hover zoom stays on `transform`. */
+  --plx-over: 20%;
+  --plx-y: 0px;
+  top: calc(var(--plx-over) / -2);
+  width: 100%; height: calc(100% + var(--plx-over));
+  max-width: none;
+  object-fit: cover;
+  translate: 0 var(--plx-y);
+  transform: scale(1);
+  transition: transform .7s cubic-bezier(.2, .65, .2, 1);
+  will-change: transform, translate;
+}
+
+.cc-card {
+  position: relative;
+  z-index: 1;
+  width: 356px;
+  max-width: 100%;
+  padding: 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+  background: var(--st-white);
+  border-radius: calc(50px * var(--corner-k, 1));   /* 80 − 30 padding: concentric */
+  corner-shape: var(--corner-shape);
+}
+.cc-tile-careers .cc-card { width: 312px; }
+
+.cc-txt { display: block; font-size: 21.25px; line-height: 1.2; }
+.cc-kicker { display: block; color: var(--st-titanium); }
+
+.cc-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 10px 20px;
+  border-radius: 48px;
+  background: var(--st-yellow);
+  color: var(--st-silicon);
+  font-size: 17px;
+  line-height: 1.3;
+  white-space: nowrap;
+  transition: background-color .3s ease, color .3s ease;
+}
+
+/* Hover / focus: photo zooms, button flips to silicon. */
+.cc-tile:hover .cc-img,
+.cc-tile:focus-visible .cc-img { transform: scale(1.05); }
+.cc-tile:hover .cc-btn,
+.cc-tile:focus-visible .cc-btn { background: var(--st-aluminium); color: var(--st-silicon); }   /* aluminium, not white: the button sits on the white card */
+.cc-tile:focus-visible { outline: 3px solid var(--st-silicon); outline-offset: 4px; }
+
+/* ---- Tablet / mobile --------------------------------------------------- */
+@media (max-width: 1100px) {
+  .cc-tile { border-radius: calc(56px * var(--corner-k, 1)); padding: 20px; }
+  .cc-card { border-radius: calc(36px * var(--corner-k, 1)); padding: 24px; }
+  .cc-txt { font-size: 19px; }
+}
+@media (max-width: 860px) {
+  .cc-duo { flex-direction: column; aspect-ratio: auto; }
+  .cc-tile { flex: none; aspect-ratio: 4 / 5; }
+  .cc-duo:hover .cc-tile, .cc-duo .cc-tile:hover { flex-grow: 0; }
+}
+@media (max-width: 760px) {
+  .cc { padding: 16px var(--page-gutter, 16px) 56px; }
+  .cc-duo { gap: 16px; }
+  .cc-tile { padding: 12px; border-radius: calc(32px * var(--corner-k, 1)); }
+  .cc-card, .cc-tile-careers .cc-card { width: 100%; padding: 20px; border-radius: calc(20px * var(--corner-k, 1)); }
+  .cc-txt { font-size: 18px; }
+}
+
+/* ---- Reduced motion ---------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .cc-tile { opacity: 1; transform: none; transition: none; }
+  .cc-img, .cc-btn { transition: none; }
+  .cc-img { --plx-over: 0%; --plx-y: 0px; }
+}

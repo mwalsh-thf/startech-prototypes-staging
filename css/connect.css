@@ -1,0 +1,131 @@
+/* =========================================================
+   Buying at volume / One-off fix (Figma 724:1440).
+   Pure white section, two columns 20px apart in a 1202px row. Each column
+   is an 80px icon (dot grid / single dot) then, 44px over, a 365px stack:
+   silicon title (Regular 26.56), 18px, body (17/1.3),
+   24px, yellow button.
+   Copy fades and slides up line by line once a column scrolls into view
+   (js/connect.js adds .is-in; stagger from --i).
+   ========================================================= */
+.connect {
+  --rv-ease: cubic-bezier(.22, 1, .36, 1);
+  position: relative;
+  z-index: 2;
+  padding: 200px 40px;
+  /* Tuck 1px under the Certified stage so the canvas can't show through
+     a sub-pixel seam between the two. */
+  margin-top: -1px;
+  /* Joins the fade to yellow while the Certified section is in view
+     (css/certified.css), then settles back to white. */
+  background-color: var(--st-white);
+  transition: background-color var(--page-fade-dur, .4s) var(--page-fade-ease, ease);
+  color: var(--st-silicon);
+}
+
+.connect-duo {
+  display: flex;
+  gap: 20px;
+  max-width: 1202px;
+  margin: 0 auto;
+}
+
+.connect-item {
+  flex: 1 0 0;
+  min-width: 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 44px;
+}
+
+/* Both icons sit in an 80×96 box; the dot grid is centred in it. */
+.connect-icon {
+  flex: none;
+  width: 80px;
+  height: 96px;
+  display: flex;
+  align-items: center;
+}
+.connect-icon img { display: block; width: 100%; height: auto; }
+
+.connect-txt {
+  flex: 0 1 365px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.connect-title {
+  margin: 0;
+  max-width: 348px;
+  font-weight: 400;
+  font-size: 26.56px;
+  line-height: 1.2;
+  letter-spacing: 0;
+}
+
+.connect-body {
+  margin: 18px 0 0;
+  max-width: 348px;
+  font-size: 17px;
+  line-height: 1.3;
+}
+
+.connect-btn {
+  margin-top: 24px;
+  display: inline-flex;
+  align-items: center;
+  padding: 10px 20px;
+  border-radius: 48px;
+  background: var(--st-yellow);
+  color: var(--st-silicon);
+  font-size: 17px;
+  line-height: 1.3;
+  white-space: nowrap;
+  text-decoration: none;
+  transition: background-color .35s var(--rv-ease), color .35s var(--rv-ease);
+}
+/* The other buttons go white on hover; on this white section that would
+   vanish, so these go aluminium (#ECEBE5) instead. */
+.connect-btn:hover, .connect-btn:focus-visible { background: var(--st-aluminium); color: var(--st-silicon); }
+
+/* ---- Entrance: fade + subtle slide, line by line ---------------------- */
+/* --o offsets the second column slightly when both arrive together. */
+.connect-item + .connect-item { --o: 120ms; }
+.connect-icon,
+.connect-rv {
+  --d: calc(var(--i, 0) * 110ms + 80ms + var(--o, 0ms));
+  opacity: 0;
+  transition: opacity .9s var(--rv-ease) var(--d), transform .9s var(--rv-ease) var(--d);
+}
+.connect-icon { --d: var(--o, 0ms); }
+.connect-rv { transform: translate3d(0, 16px, 0); }
+/* The button keeps its quick colour hover, undelayed. */
+.connect-btn.connect-rv {
+  transition: opacity .9s var(--rv-ease) var(--d), transform .9s var(--rv-ease) var(--d),
+              background-color .35s var(--rv-ease), color .35s var(--rv-ease);
+}
+.connect-item.is-in .connect-icon,
+.connect-item.is-in .connect-rv { opacity: 1; transform: none; }
+
+/* ---- Tablet / mobile --------------------------------------------------- */
+@media (max-width: 1100px) {
+  .connect { padding-block: 160px; }
+  .connect-item { gap: 32px; }
+}
+@media (max-width: 860px) {
+  .connect-duo { flex-direction: column; gap: 72px; max-width: 520px; }
+  .connect-item + .connect-item { --o: 0ms; }
+}
+@media (max-width: 760px) {
+  .connect { padding: 100px var(--page-gutter, 16px); }
+  .connect-item { gap: 24px; }
+  .connect-icon { width: 56px; height: 68px; }
+  .connect-title { font-size: 22px; }
+}
+
+/* ---- Reduced motion ---------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .connect-icon, .connect-rv { opacity: 1; transform: none; transition: none; }
+  .connect, .connect-btn { transition: none; }
+}
