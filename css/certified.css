@@ -5,7 +5,8 @@
      Act 1  heading and media fade + sharpen in from the bottom of the page
             as the section enters, rising a little as they land.
      Act 2  accordion fades up beneath the media.
-     Act 3  the accordion drawers open one after another on scroll.
+     Act 3  the accordion: drawer 01 starts open; the rest open on click,
+            one at a time.
    Page colour: once the section reaches the middle of the viewport the page
    (this stage and the Why section above it) fades from aluminium to yellow
    on a short timed transition, and back again on the way out. js/certified.js
@@ -186,8 +187,23 @@ html.is-white-page body { background-color: var(--st-white); }
 }
 
 /* ---- Accordion --------------------------------------------------------- */
+.certified-acc-wrap { grid-column: 5 / span 8; min-width: 0; }
+/* Title + intro above the accordion (Figma 742:484: Desktop/h4, 15px above
+   and below, then the accordion's 20px gap). */
+.certified-acc-intro { padding: 15px 0; margin-bottom: 20px; color: var(--st-silicon); }
+.certified-acc-title {
+  margin: 0;
+  font-weight: 400;
+  font-size: clamp(24px, 2.3vw, 33.2px);
+  line-height: 1.2;
+}
+.certified-acc-intro p {
+  margin: 10px 0 0;
+  max-width: 560px;
+  font-size: 17px;
+  line-height: 1.3;
+}
 .certified-acc {
-  grid-column: 5 / span 8;
   list-style: none;
   margin: 0;
   padding: 0;
@@ -241,11 +257,22 @@ html.is-white-page body { background-color: var(--st-white); }
   height: 100%;
   object-fit: cover;
 }
-.certified-item-head, .certified-item-body { grid-column: 2; min-width: 0; }
+.certified-item-h, .certified-item-body { grid-column: 2; min-width: 0; }
+.certified-item-h { margin: 0; font: inherit; }
 .certified-item.is-open .certified-item-head { white-space: normal; }
 /* Heading wraps inside the same 3 columns as the body copy ("The fix you can / find") */
-.certified-item.is-open .certified-item-head p:first-child { max-width: var(--acc-copy-w); }
+.certified-item.is-open .certified-item-head span:first-child { max-width: var(--acc-copy-w); }
 .certified-item-head {
+  /* A real <button>: reset it to plain text that fills the row. */
+  appearance: none;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
@@ -256,7 +283,8 @@ html.is-white-page body { background-color: var(--st-white); }
   white-space: nowrap;
   color: var(--st-silicon);
 }
-.certified-item-head p { margin: 0; }
+.certified-item.is-open .certified-item-head { cursor: default; }
+.certified-item-head:focus-visible { outline: 2px solid var(--st-silicon); outline-offset: 4px; }
 .certified-item-num {
   font-family: var(--font-fono);
   font-weight: 300;
@@ -287,6 +315,27 @@ html.is-white-page body { background-color: var(--st-white); }
   transition: opacity 0.45s ease 0.05s, transform 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.05s;
 }
 .certified-item.is-open .certified-item-body { grid-template-rows: 1fr; }
+.certified-item-link {
+  display: inline-block;
+  margin-top: 16px;
+  font-size: 17px;
+  line-height: 1.3;
+  color: var(--st-silicon);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  text-decoration-thickness: 1px;
+  opacity: 0;
+  transform: translate3d(0, 10px, 0);
+  transition: opacity 0.45s ease 0.05s, transform 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.05s, text-underline-offset 0.25s ease;
+}
+.certified-item-link:hover { text-underline-offset: 6px; }
+/* Closed drawers keep their links out of the tab order. */
+.certified-item:not(.is-open) .certified-item-link { visibility: hidden; }
+.certified-item.is-open .certified-item-link {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+  transition-delay: 0.2s;
+}
 .certified-item.is-open .certified-item-body p {
   opacity: 1;
   transform: translate3d(0, 0, 0);
@@ -313,7 +362,8 @@ html.is-white-page body { background-color: var(--st-white); }
     grid-template-columns: 1fr;
     row-gap: 24px;
   }
-  .certified-acc { grid-column: 1; }
+  .certified-acc-wrap { grid-column: 1; }
+  .certified-acc-intro p, .certified-item-link { font-size: 15px; }
   .certified-heading { padding: 0; font-size: clamp(26px, 7.5vw, 32px); }
   .certified-cta { font-size: 12px; padding: 8px 14px; bottom: 14px; }
   .certified-item-head { font-size: clamp(22px, 6.2vw, 26px); white-space: normal; }
@@ -328,8 +378,8 @@ html.is-white-page body { background-color: var(--st-white); }
     margin-top: calc(var(--acc-img) * 0.06);
     transition: height 0.7s cubic-bezier(0.16, 1, 0.3, 1), margin-top 0.7s cubic-bezier(0.16, 1, 0.3, 1);
   }
-  .certified-item-head, .certified-item-body { grid-column: 1; }
-  .certified-item.is-open .certified-item-head p:first-child { max-width: none; }
+  .certified-item-h, .certified-item-body { grid-column: 1; }
+  .certified-item.is-open .certified-item-head span:first-child { max-width: none; }
 }
 
 /* ---- Reduced motion: everything static, first drawer open -------------- */
@@ -342,5 +392,5 @@ html.is-white-page body { background-color: var(--st-white); }
   .certified-clip, .certified-zoom, .certified-cta { transition: none; }
   .certified-frame:first-child { opacity: 1; }
   .certified-row { opacity: 1; transform: none; }
-  .certified-item-body, .certified-item-body p, .certified-item, .certified-item-media { transition: none; }
+  .certified-item-body, .certified-item-body p, .certified-item-link, .certified-item, .certified-item-media { transition: none; }
 }

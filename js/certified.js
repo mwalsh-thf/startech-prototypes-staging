@@ -5,10 +5,11 @@
    at the bottom of the viewport.
     -1 → -0.45     media fades + sharpens in from the bottom of the page and
                    rises a little as it enters
-    -0.1 – 0.5     heading + accordion fade up, all drawers closed
+    -0.1 – 0.5     heading + accordion fade up
      pin        the stage pins once the accordion block is centred in the
-                viewport (p = `pinAt`) and drawer 01 opens; then the next
-                drawer opens per `drawerSpan` viewport heights of scroll    */
+                viewport (p = `pinAt`) and holds for `hold` viewport heights.
+   The drawers aren't scroll-driven: 01 starts open and the heads open the
+   others on click, one at a time.                                          */
 (() => {
   const section = document.querySelector('.certified');
   if (!section) return;
@@ -37,11 +38,24 @@
     syncPage();
   }
 
+  // ---- Accordion: click a head to open its drawer; one open at a time. ----
+  const setOpen = (idx) => {
+    items.forEach((li, i) => {
+      li.classList.toggle('is-open', i === idx);
+      const btn = li.querySelector('.certified-item-head');
+      if (btn) btn.setAttribute('aria-expanded', String(i === idx));
+    });
+  };
+  items.forEach((li, i) => {
+    const btn = li.querySelector('.certified-item-head');
+    if (btn) btn.addEventListener('click', () => setOpen(i));
+  });
+
   if (reduce) return;                       // CSS shows the static layout
 
   const stage = section.querySelector('.certified-stage');
   const ACT = { revealStart: -1, revealEnd: -0.45, copyStart: -0.1, copyEnd: 0.5,
-                drawersLead: 0.9, drawerSpan: 0.8, tail: 0.5 };
+                hold: 0.5 };
   const RISE_PX = 80;                       // how far the media rises as it enters
   const PIN_DROP = 40;                      // px the pinned accordion sits below centre
   const PIN_GAP = 24;                       // min px kept between the accordion and the viewport bottom
@@ -81,7 +95,7 @@
     }
     pinAt = -pinTop / vh;
     s.setProperty('--cert-pin-top', pinTop.toFixed(1) + 'px');
-    const runway = pinAt + ACT.drawersLead + (items.length - 1) * ACT.drawerSpan + ACT.tail;
+    const runway = pinAt + ACT.hold;
     s.height = (runway * vh + h).toFixed(0) + 'px';
   };
   const HOLD_MS = 500;                      // spritz hold per still
@@ -112,7 +126,7 @@
 
   // ---- Scroll state -------------------------------------------------------
   const s = section.style;
-  let target = 0, cur = 0, rafId = 0, running = false, lastOpen = -1, primed = false;
+  let target = 0, cur = 0, rafId = 0, running = false, primed = false;
 
   const measure = () => {
     const r = section.getBoundingClientRect();
@@ -137,15 +151,6 @@
     const cp = easeOut(seg(p, ACT.copyStart, ACT.copyEnd));
     s.setProperty('--cert-copy-opacity', cp.toFixed(3));
     s.setProperty('--cert-copy-y', ((1 - cp) * 40).toFixed(1) + 'px');
-
-    // Act 3: which drawer is open. None until the accordion is centred and
-    // the stage pins, then 01, then one more per drawerSpan.
-    const idx = target < pinAt ? -1 : Math.min(items.length - 1,
-      Math.max(0, Math.floor((target - pinAt - ACT.drawersLead) / ACT.drawerSpan) + 1));
-    if (idx !== lastOpen) {
-      items.forEach((li, i) => li.classList.toggle('is-open', i === idx));
-      lastOpen = idx;
-    }
   };
 
   const tick = () => {
