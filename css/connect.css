@@ -1,6 +1,7 @@
 /* =========================================================
-   Buying at volume / One-off fix (Figma 724:1440).
-   Pure white section, two columns 20px apart in a 1202px row. Each column
+   Connect with us (Figma 724:1440).
+   Pure white section: heading (Desktop/h1) and intro (Desktop/h6) 26px
+   apart, 100px over two columns 20px apart in a 1202px row. Each column
    is an 80px icon (dot grid / single dot) then, 44px over, a 365px stack:
    silicon title (Regular 26.56), 18px, body (17/1.3),
    24px, yellow button.
@@ -20,6 +21,24 @@
   background-color: var(--st-white);
   transition: background-color var(--page-fade-dur, .4s) var(--page-fade-ease, ease);
   color: var(--st-silicon);
+}
+
+.connect-intro {
+  max-width: 1202px;
+  margin: 0 auto 100px;
+}
+.connect-heading {
+  margin: 0;
+  font-weight: 300;
+  font-size: clamp(40px, 4.4vw, 64.85px);
+  line-height: 1;
+  letter-spacing: 0;
+}
+.connect-lede {
+  margin: 26px 0 0;
+  max-width: 713px;
+  font-size: 21.25px;
+  line-height: 1.2;
 }
 
 .connect-duo {
@@ -105,6 +124,7 @@
   transition: opacity .9s var(--rv-ease) var(--d), transform .9s var(--rv-ease) var(--d),
               background-color .35s var(--rv-ease), color .35s var(--rv-ease);
 }
+.connect-intro.is-in .connect-rv,
 .connect-item.is-in .connect-icon,
 .connect-item.is-in .connect-rv { opacity: 1; transform: none; }
 
@@ -115,6 +135,7 @@
 }
 @media (max-width: 860px) {
   .connect-duo { flex-direction: column; gap: 72px; max-width: 520px; }
+  .connect-intro { max-width: 520px; margin-bottom: 72px; }
   .connect-item + .connect-item { --o: 0ms; }
 }
 @media (max-width: 760px) {
@@ -122,6 +143,8 @@
   .connect-item { gap: 24px; }
   .connect-icon { width: 56px; height: 68px; }
   .connect-title { font-size: 22px; }
+  .connect-heading { font-size: 36px; }
+  .connect-lede { margin-top: 18px; font-size: 18px; }
 }
 
 /* ---- Reduced motion ---------------------------------------------------- */

@@ -188,20 +188,15 @@ html.is-white-page body { background-color: var(--st-white); }
 
 /* ---- Accordion --------------------------------------------------------- */
 .certified-acc-wrap { grid-column: 5 / span 8; min-width: 0; }
-/* Title + intro above the accordion (Figma 742:484: Desktop/h4, 15px above
-   and below, then the accordion's 20px gap). */
-.certified-acc-intro { padding: 15px 0; margin-bottom: 20px; color: var(--st-silicon); }
+/* Title above the accordion (Figma 742:484: Desktop/h4, 15px above and
+   below, then the accordion's 20px gap). */
 .certified-acc-title {
-  margin: 0;
+  margin: 0 0 20px;
+  padding: 15px 0;
   font-weight: 400;
   font-size: clamp(24px, 2.3vw, 33.2px);
   line-height: 1.2;
-}
-.certified-acc-intro p {
-  margin: 10px 0 0;
-  max-width: 560px;
-  font-size: 17px;
-  line-height: 1.3;
+  color: var(--st-silicon);
 }
 .certified-acc {
   list-style: none;
@@ -363,7 +358,7 @@ html.is-white-page body { background-color: var(--st-white); }
     row-gap: 24px;
   }
   .certified-acc-wrap { grid-column: 1; }
-  .certified-acc-intro p, .certified-item-link { font-size: 15px; }
+  .certified-item-link { font-size: 15px; }
   .certified-heading { padding: 0; font-size: clamp(26px, 7.5vw, 32px); }
   .certified-cta { font-size: 12px; padding: 8px 14px; bottom: 14px; }
   .certified-item-head { font-size: clamp(22px, 6.2vw, 26px); white-space: normal; }

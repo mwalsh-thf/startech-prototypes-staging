@@ -1,8 +1,8 @@
-/* Buying at volume / One-off fix.
-   Add .is-in once each column scrolls into view; the copy then fades and
+/* Connect with us.
+   Add .is-in once the intro and each column scroll into view; the copy then fades and
    slides up line by line (stagger from --i in css). */
 (() => {
-  const items = Array.from(document.querySelectorAll('.connect-item'));
+  const items = Array.from(document.querySelectorAll('.connect-intro, .connect-item'));
   if (!items.length) return;
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
