@@ -74,7 +74,7 @@
   const layout = () => {
     const r = stage.getBoundingClientRect();
     stageW = r.width; stageH = r.height;
-    const natW = photo.naturalWidth || 1682, natH = photo.naturalHeight || 2528;
+    const natW = photo.naturalWidth || 2000, natH = photo.naturalHeight || 1432;
 
     // Scale so the photo covers the stage *with the dot pinned at centre*.
     // The limiting edge is whichever side of the dot is shorter.

@@ -5,11 +5,10 @@
    at the bottom of the viewport.
     -1 → -0.45     media fades + sharpens in from the bottom of the page and
                    rises a little as it enters
-    -0.1 – 0.5     heading + accordion fade up
-     pin        the stage pins once the accordion block is centred in the
-                viewport (p = `pinAt`) and holds for `hold` viewport heights.
-   The drawers aren't scroll-driven: 01 starts open and the heads open the
-   others on click, one at a time.                                          */
+   The accordion fades up as it rises from the bottom of the viewport.
+   Nothing pins: the section scrolls like the rest of the page. The drawers
+   aren't scroll-driven either: 01 starts open and the heads open the others
+   on click, one at a time.                                                 */
 (() => {
   const section = document.querySelector('.certified');
   if (!section) return;
@@ -53,51 +52,11 @@
 
   if (reduce) return;                       // CSS shows the static layout
 
-  const stage = section.querySelector('.certified-stage');
-  const ACT = { revealStart: -1, revealEnd: -0.45, copyStart: -0.1, copyEnd: 0.5,
-                hold: 0.5 };
+  const ACT = { revealStart: -1, revealEnd: -0.45,
+                copyStart: 0.95, copyEnd: 0.6 };   // accordion top, as a fraction of vh
   const RISE_PX = 80;                       // how far the media rises as it enters
-  const PIN_DROP = 40;                      // px the pinned accordion sits below centre
-  const PIN_GAP = 24;                       // min px kept between the accordion and the viewport bottom
-  let pinAt = 0;
-
-  // The stage scrolls until the accordion row reaches the middle of the
-  // viewport, then pins there (never leaving the stage bottom above the
-  // viewport bottom). The runway is sized from the stage's real height.
   const row = section.querySelector('.certified-row');
-  const layout = () => {
-    const vh = window.innerHeight || 1;
-    stage.style.paddingBottom = '';          // measure with the CSS padding
-    // Measure with drawer 01 open (the pinned state), whatever is open now.
-    section.classList.add('is-measuring');
-    const was = items.map((li) => li.classList.contains('is-open'));
-    items.forEach((li, i) => li.classList.toggle('is-open', i === 0));
-    let h = stage.offsetHeight;
-    const rowTop = row ? row.offsetTop : 0;
-    const rowH = row ? row.offsetHeight : 0;
-    items.forEach((li, i) => li.classList.toggle('is-open', was[i]));
-    void stage.offsetHeight;                 // settle before transitions return
-    section.classList.remove('is-measuring');
-    // Centre the whole accordion block in the viewport once pinned, then sit
-    // it PIN_DROP lower so the accordion clears the fixed header's logo.
-    // On short screens that drop would push the last drawer off the bottom of
-    // the viewport, so it never sits lower than PIN_GAP above the bottom edge.
-    const centred = (vh - rowH) / 2 - rowTop + PIN_DROP;
-    const fitBottom = vh - PIN_GAP - rowTop - rowH;
-    const pinTop = Math.min(0, Math.round(Math.min(centred, fitBottom)));
-    // If that would lift the stage bottom off the viewport bottom, add page
-    // beneath the accordion so the stage still fills the screen.
-    const extra = (vh - h) - pinTop;
-    if (extra > 0) {
-      const base = parseFloat(getComputedStyle(stage).paddingBottom) || 0;
-      stage.style.paddingBottom = (base + extra).toFixed(1) + 'px';
-      h = stage.offsetHeight;
-    }
-    pinAt = -pinTop / vh;
-    s.setProperty('--cert-pin-top', pinTop.toFixed(1) + 'px');
-    const runway = pinAt + ACT.hold;
-    s.height = (runway * vh + h).toFixed(0) + 'px';
-  };
+
   const HOLD_MS = 500;                      // spritz hold per still
 
   const clamp01 = (v) => Math.max(0, Math.min(1, v));
@@ -147,8 +106,9 @@
     section.classList.toggle('is-revealed', rv >= 0.995);
     if (rv > 0.15 && target < 99) startSpritz();
 
-    // Act 2: copy fades up.
-    const cp = easeOut(seg(p, ACT.copyStart, ACT.copyEnd));
+    // Act 2: accordion fades up as its top rises through the lower viewport.
+    const rowY = row ? row.offsetTop / (window.innerHeight || 1) - p : 0;
+    const cp = easeOut(seg(rowY, ACT.copyStart, ACT.copyEnd));
     s.setProperty('--cert-copy-opacity', cp.toFixed(3));
     s.setProperty('--cert-copy-y', ((1 - cp) * 40).toFixed(1) + 'px');
   };
@@ -170,8 +130,6 @@
   };
 
   window.addEventListener('scroll', wake, { passive: true });
-  window.addEventListener('resize', () => { layout(); wake(); });
-  if (document.fonts && document.fonts.ready) document.fonts.ready.then(layout);
-  layout();
+  window.addEventListener('resize', wake);
   wake();
 })();

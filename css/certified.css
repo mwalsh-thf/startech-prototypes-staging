@@ -1,7 +1,6 @@
 /* =========================================================
    Yellow-dot Certified (Figma 700:374)
-   Pinned stage, same idea as the intro: the section owns a scroll
-   runway and everything happens inside the viewport.
+   Scrolls with the page (no pinning); motion is tied to scroll position.
      Act 1  heading and media fade + sharpen in from the bottom of the page
             as the section enters, rising a little as they land.
      Act 2  accordion fades up beneath the media.
@@ -16,31 +15,23 @@
    ========================================================= */
 
 .certified {
-  /* Runway: js/certified.js sets the height (viewport heights of scroll plus
-     the stage's own height, which is taller than a short viewport). */
   position: relative;
   padding: 0;                          /* override the generic section padding-block */
   z-index: 2;                          /* rides over the intro's tail */
   margin-top: 0;
-  height: calc(3.8 * 100svh + 100svh);
   background: transparent;             /* the stage paints the aluminium once it's in */
   color: var(--st-silicon);
 }
 
 .certified-stage {
-  position: sticky;
-  /* 0 when the stage fits the viewport; negative when it doesn't, so the
-     pinned view is anchored to the bottom and the accordion stays in view. */
-  top: var(--cert-pin-top, 0px);
-  min-height: 100svh;
+  position: relative;
   display: flex;
   flex-direction: column;
-  justify-content: center;
   --cert-gap: clamp(28px, 4.5svh, 60px);
   --cert-row-gap: 100px;               /* media → accordion */
   gap: var(--cert-gap);
   /* Top clears the fixed header now the heading leads (Figma: 80px). */
-  padding: clamp(72px, 9svh, 96px) 40px clamp(24px, 4svh, 60px);
+  padding: clamp(72px, 9svh, 96px) 40px 120px;
   box-sizing: border-box;
   overflow: hidden;
   background-color: var(--st-aluminium);
@@ -337,11 +328,6 @@ html.is-white-page body { background-color: var(--st-white); }
   transition-delay: 0.15s;
 }
 
-/* js/certified.js measures the stage with drawer 01 open; no transitions then. */
-.certified.is-measuring .certified-item,
-.certified.is-measuring .certified-item-body,
-.certified.is-measuring .certified-item-media { transition: none; }
-
 /* ---- Mobile ------------------------------------------------------------ */
 @media (max-width: 760px) {
   .certified-stage {
@@ -379,8 +365,8 @@ html.is-white-page body { background-color: var(--st-white); }
 
 /* ---- Reduced motion: everything static, first drawer open -------------- */
 @media (prefers-reduced-motion: reduce) {
-  .certified { height: auto; margin-top: 0 !important; }
-  .certified-stage { position: static; min-height: 0; padding-top: clamp(24px, 4svh, 60px); }
+  .certified { margin-top: 0 !important; }
+  .certified-stage { padding-top: clamp(24px, 4svh, 60px); }
   .certified-stage, .why { transition: none; }
   .certified-media, .certified-heading { opacity: 1; transform: none; }
   .certified-zoom { transition: none; filter: none; transform: none; }
