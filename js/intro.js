@@ -152,11 +152,15 @@
     const p = seg(sc, 0, ACT.heroEnd);           // hero progress 0→1
     // Hero phase map (p is 0→1):
     //  copy     0.02 → 0.34   white statement fades, blurs and sinks
-    //  circle   0.10 → 0.88   printed-dot size → the 2:1 frame's diagonal (eased)
+    //  dot in   0.02 → 0.12   yellow circle fades in over the printed dot
+    //  circle   0.12 → 0.88   printed-dot size → the 2:1 frame's diagonal (eased)
     //  frame    0.26 → 1.0    full-bleed → 2:1 rounded frame, inset from the page
     //  photo    0.15 → 0.80   eases up 1× → 1.08× and softens as it is covered
     //  nav ink  0.40 → 0.62   white → silicon as the frame's top edge leaves the header
-    const c = easeInOut(seg(p, 0.10, 0.88));
+    // Hidden at rest (the printed dot carries the photo), it fades in on top
+    // of it first and only then starts to grow.
+    const o = easeOut(seg(p, 0.02, 0.12));
+    const c = easeInOut(seg(p, 0.12, 0.88));
     // Grow on a log curve: linear interpolation would snap through the small
     // sizes and then crawl through the huge ones.
     // It only needs to fill the 2:1 frame it ends up clipped to, not the
@@ -169,6 +173,7 @@
     const s = stage.style;
     // The yellow circle drifts from the stage centre to the frame's centre as
     // the frame shrinks, so the second circle grows out of the same point.
+    s.setProperty('--circle-o', o.toFixed(3));
     s.setProperty('--circle-d', d.toFixed(2) + 'px');
     s.setProperty('--circle-dx', ((wide.cx - stageW / 2) * a).toFixed(1) + 'px');
     s.setProperty('--circle-dy', ((wide.cy - stageH / 2) * a).toFixed(1) + 'px');

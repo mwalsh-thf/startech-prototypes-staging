@@ -6,12 +6,8 @@
    container so the longer line, "businesses moving.", always fills them.
    The four paragraphs (Regular 21 / 1.3) sit beneath it, right-aligned to
    the headline's right edge.
-   Fade to dark (Figma 715:919): while the section crosses the middle of the
-   viewport, js/who.js sets html.is-dark-page and the page (this section, the
-   intro stage above and the Why section below) fades to silicon with white
-   text, then back to aluminium once the copy has scrolled out of view. Fading
-   in uses the yellow fade's timing (0.3s, css/certified.css); fading back out
-   is a slower 1s.
+   Entrance: js/who.js reveals the headline line by line, then the paragraphs
+   one after another, with the Why statement's blur/rise (css/why.css).
    ========================================================= */
 .who {
   /* "businesses moving." is 8.563em wide in Aeonik Light. */
@@ -26,8 +22,6 @@
   padding: clamp(100px, 14.6vw, 210px) 40px;
   background-color: var(--st-aluminium);
   color: var(--st-silicon);
-  transition: background-color var(--page-fade-dur, .4s) var(--page-fade-ease, ease),
-              color var(--page-fade-dur, .4s) var(--page-fade-ease, ease);
 }
 .who-title {
   grid-column: 2 / span 10;
@@ -52,20 +46,26 @@
 }
 .who-copy p + p { margin-top: 16px; }
 
-/* ---- Fade to dark ------------------------------------------------------ */
-.intro, .intro-stage {
-  transition: background-color var(--page-fade-dur, .4s) var(--page-fade-ease, ease);
+/* ---- Entrance -------------------------------------------------------- */
+/* .is-armed is only added by JS, so without it (or with reduced motion) the
+   copy simply shows. Same padding trick as .why-title .w so the blur isn't
+   clipped at the descenders. */
+.who-title.is-armed > span,
+.who-copy.is-armed > p {
+  opacity: 0;
+  filter: blur(14px);
+  transform: translate3d(0, 0.55em, 0) rotate(0.6deg);
+  transform-origin: 0% 100%;
 }
-.why-title { transition: color var(--page-fade-dur, .4s) var(--page-fade-ease, ease); }
-html.is-dark-page body,
-html.is-dark-page .intro,
-html.is-dark-page .intro-stage,
-html.is-dark-page .who,
-html.is-dark-page .why { background-color: var(--st-silicon); }
-html.is-dark-page .who,
-html.is-dark-page .why-title { color: var(--st-white); }
-/* Coming back out of the dark is slower and softer than going in (js/who.js). */
-html.is-dark-leaving { --page-fade-dur: 1s; --page-fade-ease: cubic-bezier(.4, 0, .2, 1); }
+.who-title.is-armed > span { padding: 0.25em 0.1em; margin: -0.25em -0.1em; }
+.who-title.is-in > span {
+  animation: why-word-in 1.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: calc(var(--i, 0) * 180ms);
+}
+.who-copy.is-in > p {
+  animation: why-word-in 1.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: calc(450ms + var(--i, 0) * 160ms);
+}
 
 @media (max-width: 1000px) {
   .who-copy { grid-column: 5 / span 7; }

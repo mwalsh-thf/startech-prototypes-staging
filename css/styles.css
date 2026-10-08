@@ -268,9 +268,9 @@ ul.st-list ul > li::before { content: ""; position: absolute; left: 0; top: 0.5e
 
 .site-header .icons { display: flex; gap: 8px; }
 .site-header button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }  /* reset only; .cart/.user below win on specificity */
-.site-header .cart { height: 40px; padding: 0 18px; border-radius: var(--r-pill); background: var(--st-yellow); display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 15px; color: var(--st-silicon); transition: background .3s var(--hdr-ease), color .3s var(--hdr-ease), transform .3s var(--hdr-ease); }
+.site-header .cart { height: 40px; padding: 0 18px; border-radius: var(--r-pill); background: var(--st-yellow); display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 15px; color: var(--st-silicon); transition: background .3s var(--hdr-ease), color .3s var(--hdr-ease); }
 .site-header .cart img { width: 17px; height: 14px; display: block; transition: filter .3s; }
-.site-header .cart:hover { background: var(--st-silicon); color: var(--st-yellow); transform: translateY(-1px); }
+.site-header .cart:hover { background: var(--st-silicon); color: var(--st-yellow); }
 .site-header .cart:hover img { filter: invert(1); }
 .site-header .user { width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--hdr-ink); color: var(--hdr-ink); background: transparent; display: flex; align-items: center; justify-content: center; transition: transform .3s var(--hdr-ease), background .3s var(--hdr-ease); }
 .site-header .user-svg { width: 15px; height: 16px; display: block; transition: color .3s; }

@@ -127,8 +127,8 @@
 .intro-stage.is-framed .intro-frame:hover .intro-photo-b { --hover-k: 1.045; }
 
 /* ---- Yellow dot → screen ---------------------------------------------------
-   One element the whole way: starts at the exact size of the dot in the photo
-   (sitting over it), grows past the stage diagonal to read as a solid yellow
+   One element the whole way: hidden at rest, it fades in at the exact size of
+   the dot in the photo (sitting over it), then grows past the stage diagonal to read as a solid yellow
    screen. It lives inside .intro-frame so the frame's rounded clip trims it,
    and drifts with the frame's centre (js: --circle-dx/dy) so the second
    circle grows out of the same point. The cables photo then covers it. */
@@ -141,7 +141,8 @@
   margin: calc(var(--circle-d, 0px) / -2) 0 0 calc(var(--circle-d, 0px) / -2);
   border-radius: 50%;
   background: var(--st-yellow);
-  will-change: width, height, margin, left, top;
+  opacity: var(--circle-o, 0);   /* fades in before it grows (js/intro.js) */
+  will-change: width, height, margin, left, top, opacity;
 }
 
 /* ---- Statement (Figma 700:50) --------------------------------------------
