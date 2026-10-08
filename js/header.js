@@ -65,3 +65,51 @@
 
   update();
 })();
+
+/* Magnetic dot: when the pointer comes close to the logo's yellow dot, the
+   dot alone leans towards it by at most ~1.5px (the wordmark stays put), eased
+   back to rest as the pointer leaves. Mouse only. */
+(() => {
+  const dot = document.querySelector('.site-header .logo-dot');
+  if (!dot) return;
+  if (!matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+  const RANGE = 60;   // px from the dot's centre where the pull starts
+  const RANGE_RIGHT = 110;  // reaches further out to the right, past the logo's end
+  const MAX = 1.5;    // px: furthest the dot ever moves
+  const EASE = 0.12;  // per-frame smoothing
+
+  let tx = 0, ty = 0, x = 0, y = 0, raf = 0;
+
+  const frame = () => {
+    x += (tx - x) * EASE;
+    y += (ty - y) * EASE;
+    if (Math.abs(tx - x) < 0.01 && Math.abs(ty - y) < 0.01) { x = tx; y = ty; raf = 0; }
+    dot.style.transform = x || y ? `translate(${x.toFixed(2)}px, ${y.toFixed(2)}px)` : '';
+    if (raf) raf = requestAnimationFrame(frame);
+  };
+  const aim = (nx, ny) => {
+    tx = nx; ty = ny;
+    if (!raf) raf = requestAnimationFrame(frame);
+  };
+
+  addEventListener('pointermove', (e) => {
+    if (e.pointerType !== 'mouse') return;
+    const r = dot.getBoundingClientRect();
+    // Measured from where the dot sits at rest, so its own drift doesn't feed back.
+    const ox = e.clientX - (r.left + r.width / 2 - x);
+    const oy = e.clientY - (r.top + r.height / 2 - y);
+    const d = Math.hypot(ox, oy);
+    // Stretch the zone out to the right: the pull is felt as far as RANGE_RIGHT
+    // on that side, falling off just as gently.
+    const reachX = ox > 0 ? RANGE / RANGE_RIGHT : 1;
+    const pull = 1 - Math.min(1, Math.hypot(ox * reachX, oy) / RANGE);
+    if (pull <= 0 || d === 0) { aim(0, 0); return; }
+    // Full lean once the pointer is past the dot's own radius, less on top of it.
+    const reach = Math.min(1, d / (r.width / 2 || 1));
+    const k = MAX * pull * pull * reach / d;  // stronger the closer it gets
+    aim(ox * k, oy * k);
+  }, { passive: true });
+  document.documentElement.addEventListener('mouseleave', () => aim(0, 0));
+})();

@@ -57,7 +57,7 @@
   const RISE_PX = 80;                       // how far the media rises as it enters
   const row = section.querySelector('.certified-row');
 
-  const HOLD_MS = 500;                      // spritz hold per still
+  const HOLD_MS = 750;                      // spritz hold per still
 
   const clamp01 = (v) => Math.max(0, Math.min(1, v));
   const seg = (p, a, b) => clamp01((p - a) / (b - a));

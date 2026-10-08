@@ -9,8 +9,9 @@
    Fade to dark (Figma 715:919): while the section crosses the middle of the
    viewport, js/who.js sets html.is-dark-page and the page (this section, the
    intro stage above and the Why section below) fades to silicon with white
-   text, then back to aluminium once it leaves. Same timing (0.3s) as the yellow
-   fade in css/certified.css.
+   text, then back to aluminium once the copy has scrolled out of view. Fading
+   in uses the yellow fade's timing (0.3s, css/certified.css); fading back out
+   is a slower 1s.
    ========================================================= */
 .who {
   /* "businesses moving." is 8.563em wide in Aeonik Light. */
@@ -63,6 +64,8 @@ html.is-dark-page .who,
 html.is-dark-page .why { background-color: var(--st-silicon); }
 html.is-dark-page .who,
 html.is-dark-page .why-title { color: var(--st-white); }
+/* Coming back out of the dark is slower and softer than going in (js/who.js). */
+html.is-dark-leaving { --page-fade-dur: 1s; --page-fade-ease: cubic-bezier(.4, 0, .2, 1); }
 
 @media (max-width: 1000px) {
   .who-copy { grid-column: 5 / span 7; }
