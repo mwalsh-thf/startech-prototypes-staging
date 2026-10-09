@@ -85,6 +85,10 @@ a.ft-lnk:hover, a.ft-lnk:focus-visible { color: var(--st-yellow); }
   padding-top: 24px;
   border-top: 1px solid rgba(255, 255, 255, .12);
 }
+/* Legal line (Figma 807:1494): Fono with stylistic alternates, a red maple
+   leaf between the two halves. */
+.ft-made { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 0; font-feature-settings: "salt" 1; }
+.ft-made svg { flex: none; }
 .ft-legal-links { display: flex; gap: 20px; flex-wrap: wrap; }
 .ft-legal a { transition: color .3s var(--ft-ease); }
 .ft-legal a:hover, .ft-legal a:focus-visible { color: var(--st-yellow); }
